@@ -1,16 +1,19 @@
 package com.example.textextractorapplication
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
     private lateinit var imageView: ImageView
@@ -29,23 +32,32 @@ class MainActivity : AppCompatActivity() {
         selectButton = findViewById(R.id.selectButton)
 
         captureButton.setOnClickListener {
-            if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 openCamera()
             } else {
-                requestPermissions(arrayOf(android.Manifest.permission.CAMERA), PERMISSION_CODE)
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), PERMISSION_CODE)
             }
         }
 
         selectButton.setOnClickListener {
-            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                openGallery()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // For Android 13+, use READ_MEDIA_IMAGES
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                    openGallery()
+                } else {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), PERMISSION_CODE)
+                }
             } else {
-                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), PERMISSION_CODE)
+                // For earlier versions, use READ_EXTERNAL_STORAGE
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    openGallery()
+                } else {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), PERMISSION_CODE)
+                }
             }
         }
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
     private fun openCamera() {
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.TITLE, "New Picture")
@@ -66,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openGallery(){
+    private fun openGallery() {
         val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(galleryIntent, IMAGE_PICK_CODE)
     }
@@ -79,12 +91,12 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openCamera()
-            }
-            else if (permissions[0] == android.Manifest.permission.READ_EXTERNAL_STORAGE) {
-                openGallery()
-            }
-            else {
+                if (permissions[0] == Manifest.permission.CAMERA) {
+                    openCamera()
+                } else if (permissions[0] == Manifest.permission.READ_EXTERNAL_STORAGE || permissions[0] == Manifest.permission.READ_MEDIA_IMAGES) {
+                    openGallery()
+                }
+            } else {
                 Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show()
             }
         }
