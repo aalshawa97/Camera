@@ -36,6 +36,7 @@ android {
 }
 
 dependencies {
+    implementation("com.rmtheis:tess-two:9.1.0") // Use the latest version
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

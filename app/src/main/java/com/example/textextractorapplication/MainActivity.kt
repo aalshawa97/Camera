@@ -1,6 +1,7 @@
 package com.example.textextractorapplication
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,10 +11,15 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+//Optical character recognition engine
+import com.googlecode.tesseract.android.TessBaseAPI
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
     private lateinit var imageView: ImageView
@@ -23,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private val IMAGE_CAPTURE_CODE = 1001
     private val IMAGE_PICK_CODE = 1002
     private var imageUri: Uri? = null
+    private lateinit var tessBaseAPI: TessBaseAPI
+    private lateinit var extractedTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +38,16 @@ class MainActivity : AppCompatActivity() {
         imageView = findViewById(R.id.imageView)
         captureButton = findViewById(R.id.captureButton)
         selectButton = findViewById(R.id.selectButton)
+        //extractedTextView = findViewById(R.id.extractedTextView) // Initialize TextView
+
+        // Initialize Tesseract
+        /*
+        val dataPath = filesDir.absolutePath + "/tesseract/"
+        if (!File(dataPath + "tessdata/").exists()) {
+            copyTessDataFiles()
+        }*/
+        //tessBaseAPI = TessBaseAPI()
+        //tessBaseAPI.init(dataPath, "eng")
 
         captureButton.setOnClickListener {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -41,14 +59,12 @@ class MainActivity : AppCompatActivity() {
 
         selectButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                // For Android 13+, use READ_MEDIA_IMAGES
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
                     openGallery()
                 } else {
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), PERMISSION_CODE)
                 }
             } else {
-                // For earlier versions, use READ_EXTERNAL_STORAGE
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     openGallery()
                 } else {
@@ -58,6 +74,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun extractTextFromImage(uri: Uri){
+        /*
+        val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+        tessBaseAPI.setImage(imageBitmap)
+        val extractedText = tessBaseAPI.utF8Text
+        tessBaseAPI.end()
+        displayExtractedText(extractedText)
+        */
+    }
+
+    private fun displayExtractedText(text: String) {
+        extractedTextView.text = text
+    }
+
+    private fun copyTessDataFiles() {
+        val assetManager = assets
+        val tessDataDir = File(filesDir, "tesseract/tessdata")
+        if (!tessDataDir.exists()) {
+            tessDataDir.mkdirs()
+        }
+        try {
+            val assetFiles = assetManager.list("tessdata")
+            assetFiles?.forEach { filename ->
+                val file = File(tessDataDir, filename)
+                if (!file.exists()) {
+                    assetManager.open("tessdata/$filename").use { inputStream ->
+                        FileOutputStream(file).use { outputStream ->
+                            val buffer = ByteArray(1024)
+                            var length: Int
+                            while (inputStream.read(buffer).also { length = it } > 0) {
+                                outputStream.write(buffer, 0, length)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    @SuppressLint("QueryPermissionsNeeded")
     private fun openCamera() {
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.TITLE, "New Picture")
@@ -102,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
@@ -109,14 +168,19 @@ class MainActivity : AppCompatActivity() {
                 IMAGE_CAPTURE_CODE -> {
                     imageUri?.let {
                         imageView.setImageURI(it)
+                        extractTextFromImage(it) // Extract text from the captured image
                     }
                 }
                 IMAGE_PICK_CODE -> {
                     data?.data?.let { uri ->
                         imageView.setImageURI(uri)
+                        extractTextFromImage(uri) // Extract text from the selected image
                     }
                 }
             }
         }
     }
+
+
+
 }

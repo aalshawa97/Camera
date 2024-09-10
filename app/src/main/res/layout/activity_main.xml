@@ -19,7 +19,7 @@
         android:id="@+id/selectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Image"
+        android:text="@string/select_image"
         android:layout_below="@+id/captureButton"
         android:layout_marginTop="16dp"/>
 
@@ -29,5 +29,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/selectButton"
         android:layout_marginTop="16dp"/>
+
+    <!--<TextView
+        android:id="@+id/extractedTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/imageView"
+        android:padding="16dp"
+        android:text="Welcome"
+        android:textSize="16sp" />-->
 
 </RelativeLayout>
