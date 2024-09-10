@@ -10,33 +10,33 @@
 
     <Button
         android:id="@+id/captureButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/capture_image"
-        />
+        android:text="@string/capture_image" />
 
     <Button
         android:id="@+id/selectButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/select_image"
         android:layout_below="@+id/captureButton"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:text="@string/select_image" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="395dp"
+        android:layout_height="441dp"
         android:layout_below="@+id/selectButton"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/imageViewDescription" />
 
     <!--<TextView
         android:id="@+id/extractedTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/imageView"
+        android:layout_width="392dp"
+        android:layout_height="130dp"
+        android:layout_below="@+id/imageView"
+        android:layout_marginTop="16dp"
         android:padding="16dp"
         android:text="Welcome"
         android:textSize="16sp" />-->
-
 </RelativeLayout>
