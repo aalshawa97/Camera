@@ -3,4 +3,5 @@
     <string name="capture_image">Capture Image</string>
     <string name="select_image">Select Image</string>
     <string name="imageViewDescription">Shows image</string>
+    <string name="made_with_by_abdullah">Made with ❤️ by Abdullah</string>
 </resources>
